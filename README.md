@@ -1,9 +1,6 @@
-Aqui está o conteúdo formatado e pronto para ser salvo como um arquivo `.md`. Você pode copiar o bloco abaixo e salvar como `INSTALL_UBUNTU.md` no seu repositório.
-
----
 
 ```markdown
-# 🚀 Guia de Instalação: LangChain no Ubuntu (Linux)
+# 🚀 Guia de Instalação: LangChain no Ubuntu 24.04.3 LTS
 
 Este guia foi criado para resolver os problemas de pacotes gerenciados externamente (PEP 668), conflitos de versões de bibliotecas de IA e incompatibilidades de pacotes exclusivos de Windows em ambientes Linux.
 
@@ -91,9 +88,9 @@ Crie um arquivo `check_env.py` com o código abaixo:
 ```python
 import langchain
 import torch
-print(f"✅ LangChain: {langchain.__version__}")
-print(f"✅ Torch Device: {'CPU' if not torch.cuda.is_available() else 'GPU'}")
-print("🚀 Ambiente pronto para o curso!")
+print(f"LangChain: {langchain.__version__}")
+print(f"Torch Device: {'CPU' if not torch.cuda.is_available() else 'GPU'}")
+print("Ambiente pronto!")
 
 ```
 
