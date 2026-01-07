@@ -56,7 +56,7 @@ pip install "langchain>=0.3.0,<0.4.0" \
 Para evitar erros de drivers NVIDIA/CUDA no Ubuntu, instalamos a versão otimizada para processadores:
 
 ```bash
-pip install scikit-learn torch --extra-index-url [https://download.pytorch.org/whl/cpu](https://download.pytorch.org/whl/cpu)
+pip install scikit-learn torch --extra-index-url https://download.pytorch.org/whl/cpu
 
 ```
 
