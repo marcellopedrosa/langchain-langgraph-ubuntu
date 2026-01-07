@@ -103,14 +103,3 @@ Execute com: `python3 check_env.py`
 ```
 
 ---
-
-### Como salvar isso via terminal no Ubuntu:
-Se quiser criar o arquivo agora mesmo, rode este comando no seu terminal:
-```bash
-nano INSTALL_UBUNTU.md
-
-```
-
-Cole o conteúdo acima, aperte `Ctrl + O` (para salvar) e `Ctrl + X` (para sair).
-
-Posso te ajudar com a configuração das chaves de API no seu arquivo `.env` para você começar o curso?
