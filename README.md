@@ -154,5 +154,3 @@ if __name__ == "__main__":
 *Este guia foi testado no Ubuntu 24.04.3 LTS com Python 3.12 e LangChain 0.3+.*
 
 ---
-
-Deseja que eu ajude você a configurar o **Git** para subir este novo guia diretamente para o seu repositório no GitHub?
