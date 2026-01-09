@@ -1,105 +1,127 @@
 
 ```markdown
-# 🚀 Guia de Instalação: LangChain no Ubuntu 24.04.3 LTS
+# 🚀 Guia de Instalação: LangChain no Ubuntu 24.04 LTS
 
-Este guia foi criado para resolver os problemas de pacotes gerenciados externamente (PEP 668), conflitos de versões de bibliotecas de IA e incompatibilidades de pacotes exclusivos de Windows em ambientes Linux.
+Este guia fornece o passo a passo definitivo para configurar o LangChain no Ubuntu, resolvendo conflitos de pacotes gerenciados externamente (PEP 668), erros de drivers NVIDIA/CUDA e, principalmente, corrigindo o erro **404 NOT_FOUND** na integração com o Google Gemini.
 
-## 1. Requisitos do Sistema
-Antes de começar, instale as dependências nativas do Ubuntu necessárias para o processamento de documentos (PDF, imagens, etc):
+## 1. Preparação do Sistema
+Instale as dependências nativas necessárias para o processamento de arquivos (PDFs, imagens e OCR):
 
 ```bash
-sudo apt update
-sudo apt install python3-venv libmagic-dev poppler-utils tesseract-ocr -y
+sudo apt update && sudo apt install -y \
+    python3-venv \
+    libmagic-dev \
+    poppler-utils \
+    tesseract-ocr \
+    build-essential
 
 ```
 
-## 2. Criando o Ambiente Isolado
+## 2. Criando o Ambiente Isolado (Obrigatório)
 
-Nunca utilize o `sudo pip`. No Ubuntu, sempre use um Ambiente Virtual (`venv`):
+No Ubuntu 24.04, o uso de Ambientes Virtuais (`venv`) é obrigatório para evitar a quebra do Python do sistema.
 
 ```bash
-# Navegue até a pasta do projeto
+# Navegue até a pasta do seu projeto
 cd ~/Documents/workspace/curso-langchain
 
-# Crie e ative o ambiente
+# Remova o ambiente antigo se houver erros persistentes
+rm -rf .venv 
+
+# Crie e ative o novo ambiente
 python3 -m venv .venv
 source .venv/bin/activate
 
 ```
 
-## 3. Sequência de Instalação (Sem Erros)
+## 3. Instalação de Pacotes (Ordem Recomendada)
 
-Instale por blocos para garantir que o gerenciador de pacotes (`pip`) não entre em conflito:
+Instale os pacotes em blocos para garantir que as dependências sejam resolvidas sem conflitos de versão.
 
-### Passo A: Base de Dados e Ferramentas de Build
+### Passo A: Base e LangChain Core
 
 ```bash
-pip install setuptools "pydantic>=2.9.2,<2.10.0" "langsmith>=0.1.125,<0.2.0" "pypdf>=4.0"
+pip install -U pip setuptools
+pip install langchain langchain-community langchain-core \
+            langchain-chroma chromadb pypdf python-dotenv
 
 ```
 
-### Passo B: Core do LangChain e ChromaDB
+### Passo B: Provedores de IA (Correção para Gemini)
+
+Para evitar o erro de modelo não encontrado (404), instalamos a versão estável do SDK do Google:
 
 ```bash
-pip install "langchain>=0.3.0,<0.4.0" \
-            "langchain-community>=0.3.0,<0.4.0" \
-            "langchain-core>=0.3.0,<0.4.0" \
-            "langchain-chroma>=0.1.0,<0.3.0" \
-            "chromadb>=0.5.13,<0.6.0" \
-            "tokenizers>=0.19.0,<0.21.0" \
-            "transformers>=4.40.0,<4.47.0"
+pip install -U langchain-openai langchain-google-genai \
+               langchain-groq google-generativeai
 
 ```
+
+*Nota: Evite instalar o pacote `google-genai` (experimental) junto com o `google-generativeai`, pois isso causa conflitos de versão da API.*
 
 ### Passo C: Motores de Cálculo (Versão CPU)
 
-Para evitar erros de drivers NVIDIA/CUDA no Ubuntu, instalamos a versão otimizada para processadores:
+Garante que o código funcione sem procurar placas de vídeo NVIDIA:
 
 ```bash
-pip install scikit-learn torch --extra-index-url https://download.pytorch.org/whl/cpu
+pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cpu](https://download.pytorch.org/whl/cpu)
 
 ```
 
-### Passo D: Provedores e Utilitários de Dados
+## 4. Configuração do Ambiente (.env)
 
-```bash
-pip install langchain-openai langchain-google-genai langchain-groq \
-            langchain-huggingface langchain-ollama langchain-qdrant \
-            openai groq google-ai-generativelanguage ollama \
-            python-dotenv fastapi uvicorn httpx requests python-magic \
-            PyMuPDF pandas numpy sqlalchemy "unstructured[all-docs]"
+Crie um arquivo `.env` na raiz do projeto e adicione suas chaves:
+
+```text
+GOOGLE_API_KEY=sua_chave_aqui
+OPENAI_API_KEY=sua_chave_aqui
 
 ```
 
-## 4. Troubleshooting: Como lidar com avisos
+## 5. Script de Teste: Gemini 1.5 Flash
 
-Durante a instalação, você poderá ver mensagens de erro ou avisos. Veja como interpretá-los:
-
-| Erro Comum | Causa | Ação |
-| --- | --- | --- |
-| `nvidia-xxx-cu12 not installed` | O PyTorch está procurando uma placa de vídeo NVIDIA. | **Ignore.** O sistema usará a CPU para os cálculos. |
-| `No matching distribution for pywin32` | O pacote é exclusivo para Windows. | **Ignore.** Ele não é necessário no Ubuntu. |
-| `pip's dependency resolver conflict` | Versões de bibliotecas secundárias com pequenos desvios. | **Ignore.** Se o LangChain carregar, o projeto funcionará. |
-
-## 5. Teste de Sanidade
-
-Crie um arquivo `check_env.py` com o código abaixo:
+Crie um arquivo chamado `teste_gemini.py` para validar a instalação:
 
 ```python
-import langchain
-import torch
-print(f"LangChain: {langchain.__version__}")
-print(f"Torch Device: {'CPU' if not torch.cuda.is_available() else 'GPU'}")
-print("Ambiente pronto!")
+import os
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+load_dotenv()
+
+def test_connection():
+    try:
+        # Inicializa o modelo (Use apenas o nome, a lib resolve o prefixo)
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash",
+            temperature=0
+        )
+        
+        print("--- Enviando requisição ao Gemini ---")
+        response = llm.invoke("Responda apenas: Sistema operacional e Gemini configurados!")
+        print(f"✅ Sucesso: {response.content}")
+        
+    except Exception as e:
+        print(f"❌ Erro na configuração: {e}")
+
+if __name__ == "__main__":
+    test_connection()
 
 ```
 
-Execute com: `python3 check_env.py`
+## 6. Solução de Problemas (Troubleshooting)
+
+| Erro | Causa Provável | Solução |
+| --- | --- | --- |
+| **404 NOT_FOUND (v1beta)** | Conflito de bibliotecas ou versão da API. | Rode `pip uninstall google-genai` e mantenha apenas `google-generativeai`. |
+| **externally-managed-environment** | Tentativa de usar `pip` global. | Certifique-se de que o `.venv` está ativo (`source .venv/bin/activate`). |
+| **No matching distribution for pywin32** | Dependência exclusiva de Windows. | **Ignore.** O projeto funcionará normalmente no Ubuntu. |
+| **Nvidia/CUDA warnings** | PyTorch procurando GPU. | **Ignore.** O sistema usará a CPU automaticamente conforme configurado no Passo 3C. |
 
 ---
 
-*Nota: Este guia foi otimizado para Python 3.12 no Ubuntu 24.04.*
+*Este guia foi testado no Ubuntu 24.04.3 LTS com Python 3.12.*
+
+``` repositório GitHub via linha de comando?
 
 ```
-
----
