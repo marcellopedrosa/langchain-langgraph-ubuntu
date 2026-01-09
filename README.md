@@ -63,7 +63,6 @@ pip install scikit-learn torch --extra-index-url https://download.pytorch.org/wh
 ### Passo D: Provedores e Utilitários de Dados
 
 ```bash
-# No Passo D do seu guia:
 pip install langchain-openai langchain-google-genai langchain-groq \
             langchain-huggingface langchain-ollama langchain-qdrant \
             openai groq google-ai-generativelanguage ollama \
